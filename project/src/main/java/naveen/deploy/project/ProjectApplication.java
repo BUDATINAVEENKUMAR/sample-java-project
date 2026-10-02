@@ -11,6 +11,8 @@ public class ProjectApplication {
 		for(int i=0;i< 10; i++){
 			System.out.println("Naveen is hero " + i);
 		}
+
+		
 	}
 
 }
