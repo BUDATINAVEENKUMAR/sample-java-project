@@ -1,0 +1,36 @@
+version: 0.2
+env:
+  parameter-store:
+    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/docker_username
+    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/docker_password
+    DOCKER_REGISTRY_URL: /myapp/docker-credentials/docker_registry_url
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+
+  pre_build:
+    commands:
+      - echo "Java version:"
+      - java -version
+      - echo "Maven version:"
+      - mvn -version
+
+  build:
+    commands:
+      - cd project
+      - echo "Building Maven project..."
+      - mvn clean install
+      - echo "Building Docker image..."
+      - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY_URL"
+      - docker build -t "$DOCKER_REGISTRY_URL/c/sample-java-project:latest" .
+      - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/sample-java-project:latest"
+
+  post_build:
+    commands:
+      - echo "Build completed successfully."
+
+artifacts:
+  files:
+    - project/target/naveen-project-*.jar
+  discard-paths: yes
